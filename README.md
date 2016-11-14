@@ -9,8 +9,6 @@ By default, ListOpenDescriptors will print its output to *stdout*. You can overr
 ListOpenDescriptors must be compiled as a shared library:
 
 ```
-#!bash
-
 gcc -fPIC -shared -Wall -Wextra list_open_fds.c -o liblist_open_fds.so -ldl
 ```
 
@@ -20,8 +18,6 @@ gcc -fPIC -shared -Wall -Wextra list_open_fds.c -o liblist_open_fds.so -ldl
 Preload *liblist_open_fds.so* into your executable (optionally, provide a path to an output file):
 
 ```
-#!bash
-
 LD_PRELOAD=./liblist_open_fds.so target_executable
 # or:
 FD_OUTPUT_PATH=/tmp/fd_out LD_PRELOAD=./liblist_open_fds.so target_executable
