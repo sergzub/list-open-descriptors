@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-void __attribute__((destructor(65535))) list_open_fds()
+void __attribute__((destructor(101))) list_open_fds()
 {
     const char *output_path = getenv("FD_OUTPUT_PATH");
 
@@ -24,6 +24,7 @@ void __attribute__((destructor(65535))) list_open_fds()
         {
             int fd = atoi(fd_entry->d_name);
 
+            // TODO: skip fd of the 'out' too
             if (fd == dirfd(fd_dir))
             {
                 // skip '/proc/self/fd/'
@@ -33,10 +34,15 @@ void __attribute__((destructor(65535))) list_open_fds()
             char symlink_name[PATH_MAX];
             if (snprintf(symlink_name, PATH_MAX, "/proc/self/fd/%d", fd) > 0)
             {
-                char real_name[PATH_MAX];
-                if (readlink(symlink_name, real_name, PATH_MAX) == -1)
+                char real_name[PATH_MAX + 1];
+                ssize_t cnt = readlink(symlink_name, real_name, PATH_MAX);
+                if (cnt == -1)
                 {
-                    sprintf(real_name, "<unknown>");
+                    strcpy(real_name, "<unknown>");
+                }
+                else
+                {
+                    real_name[cnt] = '\0';
                 }
 
                 fprintf(out, "Open file descriptor %d: %s\n", fd, real_name);
